@@ -1,0 +1,223 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/substack/json-stable-stringify"
+
+    >json-stable-stringify (v1.0.1)</a>
+</h1>
+<h4>deterministic JSON.stringify() with custom sorting to get deterministic hashes from stringified results</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.json-stable-stringify">module json-stable-stringify</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.json-stable-stringify.json-stable-stringify">
+            function <span class="apidocSignatureSpan"></span>json-stable-stringify
+            <span class="apidocSignatureSpan">(obj, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.json-stable-stringify.toString">
+            function <span class="apidocSignatureSpan">json-stable-stringify.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.json-stable-stringify.toString">module json-stable-stringify.toString</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.json-stable-stringify.toString.toString">
+            function <span class="apidocSignatureSpan">json-stable-stringify.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.json-stable-stringify" id="apidoc.module.json-stable-stringify">module json-stable-stringify</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.json-stable-stringify.json-stable-stringify" id="apidoc.element.json-stable-stringify.json-stable-stringify">
+        function <span class="apidocSignatureSpan"></span>json-stable-stringify
+        <span class="apidocSignatureSpan">(obj, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">json-stable-stringify = function (obj, opts) {
+    if (!opts) opts = {};
+    if (typeof opts === &#x27;function&#x27;) opts = { cmp: opts };
+    var space = opts.space || &#x27;&#x27;;
+    if (typeof space === &#x27;number&#x27;) space = Array(space+1).join(&#x27; &#x27;);
+    var cycles = (typeof opts.cycles === &#x27;boolean&#x27;) ? opts.cycles : false;
+    var replacer = opts.replacer || function(key, value) { return value; };
+
+    var cmp = opts.cmp &#x26;&#x26; (function (f) {
+        return function (node) {
+            return function (a, b) {
+                var aobj = { key: a, value: node[a] };
+                var bobj = { key: b, value: node[b] };
+                return f(aobj, bobj);
+            };
+        };
+    })(opts.cmp);
+
+    var seen = [];
+    return (function stringify (parent, key, node, level) {
+        var indent = space ? (&#x27;\n&#x27; + new Array(level + 1).join(space)) : &#x27;&#x27;;
+        var colonSeparator = space ? &#x27;: &#x27; : &#x27;:&#x27;;
+
+        if (node &#x26;&#x26; node.toJSON &#x26;&#x26; typeof node.toJSON === &#x27;function&#x27;) {
+            node = node.toJSON();
+        }
+
+        node = replacer.call(parent, key, node);
+
+        if (node === undefined) {
+            return;
+        }
+        if (typeof node !== &#x27;object&#x27; || node === null) {
+            return json.stringify(node);
+        }
+        if (isArray(node)) {
+            var out = [];
+            for (var i = 0; i &#x3c; node.length; i++) {
+                var item = stringify(node, i, node[i], level+1) || json.stringify(null);
+                out.push(indent + space + item);
+            }
+            return &#x27;[&#x27; + out.join(&#x27;,&#x27;) + indent + &#x27;]&#x27;;
+        }
+        else {
+            if (seen.indexOf(node) !== -1) {
+                if (cycles) return json.stringify(&#x27;__cycle__&#x27;);
+                throw new TypeError(&#x27;Converting circular structure to JSON&#x27;);
+            }
+            else seen.push(node);
+
+            var keys = objectKeys(node).sort(cmp &#x26;&#x26; cmp(node));
+            var out = [];
+            for (var i = 0; i &#x3c; keys.length; i++) {
+                var key = keys[i];
+                var value = stringify(node, key, node[key], level+1);
+
+                if(!value) continue;
+
+                var keyValue = json.stringify(key)
+                    + colonSeparator
+                    + value;
+                ;
+                out.push(indent + space + keyValue);
+            }
+            seen.splice(seen.indexOf(node), 1);
+            return &#x27;{&#x27; + out.join(&#x27;,&#x27;) + indent + &#x27;}&#x27;;
+        }
+    })({ &#x27;&#x27;: obj }, &#x27;&#x27;, obj, 0);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.json-stable-stringify.toString" id="apidoc.element.json-stable-stringify.toString">
+        function <span class="apidocSignatureSpan">json-stable-stringify.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return text;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.json-stable-stringify.toString" id="apidoc.module.json-stable-stringify.toString">module json-stable-stringify.toString</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.json-stable-stringify.toString.toString" id="apidoc.element.json-stable-stringify.toString.toString">
+        function <span class="apidocSignatureSpan">json-stable-stringify.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toString() { [native code] }</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
