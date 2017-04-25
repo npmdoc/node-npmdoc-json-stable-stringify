@@ -1,6 +1,6 @@
 # npmdoc-json-stable-stringify
 
-#### api documentation for  [json-stable-stringify (v1.0.1)](https://github.com/substack/json-stable-stringify)  [![npm package](https://img.shields.io/npm/v/npmdoc-json-stable-stringify.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-json-stable-stringify) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-json-stable-stringify.svg)](https://travis-ci.org/npmdoc/node-npmdoc-json-stable-stringify)
+#### basic api documentation for  [json-stable-stringify (v1.0.1)](https://github.com/substack/json-stable-stringify)  [![npm package](https://img.shields.io/npm/v/npmdoc-json-stable-stringify.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-json-stable-stringify) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-json-stable-stringify.svg)](https://travis-ci.org/npmdoc/node-npmdoc-json-stable-stringify)
 
 #### deterministic JSON.stringify() with custom sorting to get deterministic hashes from stringified results
 
@@ -78,7 +78,8 @@
             "opera/latest"
         ]
     },
-    "version": "1.0.1"
+    "version": "1.0.1",
+    "bin": {}
 }
 ```
 
